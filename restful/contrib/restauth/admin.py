@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+
+# class VerifyCodeForm(ModelForm):
+#     class Meta:
+#         model = VerifyCode
+#         widgets = {
+#             'created': SuitSplitDateTimeWidget,
+#             'mobile': HTML5Input(input_type='number'),
+#         }
+#         exclude = ('status_changed', 'code')
+#
+#
+# class VerifyCodeAdmin(admin.ModelAdmin):
+#     list_display = ('mobile', 'code', 'status', 'created')
+#     form = VerifyCodeForm
+#
+#     def has_add_permission(self, request):
+#         pass
+#
+#     def has_delete_permission(self, request, obj=None):
+#         pass
+#
+#
+# admin.site.register(VerifyCode, VerifyCodeAdmin)
