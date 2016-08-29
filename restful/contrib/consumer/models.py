@@ -9,10 +9,12 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import signals
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from imagekit.models import ProcessedImageField
-from model_utils.models import TimeStampedModel
+from model_utils.models import TimeStampedModel, StatusModel
 from pilkit.processors import ResizeToFill
 from rest_framework.serializers import ValidationError
 
@@ -77,17 +79,21 @@ class CustomUser(AbstractUser):
     device = models.CharField(_(u'设备号'), max_length=100, blank=False, null=False)
     slug = models.UUIDField(_(u'slug'), null=True, blank=True, auto_created=True)
     jpush_registration_id = models.CharField(_(u'jpush_registration_id'), max_length=200, blank=True, null=True)
-    # birthday = models.DateField(_(u'生日'), blank=True, null=True)
-    # zodiac_zh = models.CharField(_(u'生肖'), max_length=25, blank=True)
-    # avatar = models.ImageField(_(u'头像'), max_length=200, blank=True)
-    # zodiac = models.CharField(_(u'星座'), max_length=25, blank=True)
-    # gender = models.CharField(_(u'性别'), max_length=25, default='male', choices=GENDER_CHOICES)
-    # score_total = models.IntegerField(_(u'积分'), default=0)
 
     objects = CustomUserManager()
 
     def short(self):
         short_url.encode_url(self.pk)
+
+
+@receiver(signals.post_save, sender=CustomUser)
+def sync_customuser(instance, created, **kwargs):
+    if created:
+        contact, status = Contacts.objects.get_or_create(mobile=instance.mobile, status=0)
+
+        if status:
+            contact.status = 1
+            contact.save()
 
 
 class Message(TimeStampedModel):
@@ -100,15 +106,28 @@ class Message(TimeStampedModel):
     summary = models.CharField(verbose_name=_(u'收藏内容的描述'), max_length=255, default='')
 
 
-class Contacts(TimeStampedModel):
+class Contacts(TimeStampedModel, StatusModel):
     '''
     联系人
     '''
-    # STATIS = (('0', _('未注册')), ('1', _('注册')))
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
-    content = models.TextField(_('联系人内容'), blank=True,null=True)
-    # name = models.CharField(verbose_name=_(u'联系人姓名'), max_length=255, default='')
-    # mobile = models.CharField(verbose_name=_(u'联系人手机'), max_length=255, default='')
+    STATUS = (('0', _('未注册')), ('1', _('注册')))
+    owner = models.ManyToManyField(settings.AUTH_USER_MODEL, null=True)
+    mobile = models.CharField(verbose_name=_(u'联系人手机'), max_length=25, default='', unique=True)
+    name = models.CharField(verbose_name=_(u'联系人姓名'), max_length=100, default='')
+
+
+@receiver(signals.post_save, sender=Contacts)
+def sync_contact(instance, created, **kwargs):
+    if created:
+        user = CustomUser.objects.filter(mobile=instance.mobile).count()
+        if user:
+            instance.status = 1
+            instance.save()
+
+
+class Friends(TimeStampedModel):
+    owner = models.ForeignKey(CustomUser)
+    friend = models.ForeignKey(Contacts)
 
 
 class History(TimeStampedModel):
@@ -138,6 +157,7 @@ class Verification(TimeStampedModel):
     def save(self, *args, **kwargs):
         if not self.verify:
             self.code = self.generate_key()
+
         return super(Verification, self).save(*args, **kwargs)
 
     def generate_key(self):
@@ -160,19 +180,6 @@ class Profile(TimeStampedModel):
     owner = models.OneToOneField(settings.AUTH_USER_MODEL, unique=True, db_index=True, related_name='profile')
     name = models.CharField(verbose_name=_(u'姓名'), blank=True, max_length=255, db_index=True)
     nick = models.CharField(verbose_name=_(u'昵称'), blank=True, null=True, max_length=255, db_index=True)
-    # phone = models.CharField(verbose_name=_(u'电话'), default='', blank=True, max_length=64)
-    # gender = models.CharField(verbose_name=_(u'性别'), max_length=10, choices=GENDER_CHOICES, default=u'male')
-    # zodiac = models.CharField(_(u'星座'), max_length=25, blank=True)
-    # birthday = models.DateField(_(u'生日'), blank=True, null=True)
-    # alipay = models.CharField(verbose_name=_(u'支付宝'), max_length=100, blank=True)
-    # qq = models.CharField(verbose_name=_(u'QQ'), max_length=100, blank=True)
-    # chinese_zodiac = models.CharField(_(u'生肖'), max_length=25, blank=True)
-    #
-    # payment = models.DecimalField(verbose_name=_(u'已经提现'), default=0.00, max_digits=10, decimal_places=2)
-    # balance = models.DecimalField(verbose_name=_(u'帐户余额'), default=0.00, max_digits=10, decimal_places=2)
-    # total = models.DecimalField(verbose_name=_(u'帐户总额'), default=0.00, max_digits=10, decimal_places=2)
-
-    # qrcode = models.ImageField(verbose_name=_(u'二维码'), upload_to='qrcode')
     avatar = ProcessedImageField(verbose_name=_(u'头像'), upload_to='avatar', processors=[ResizeToFill(320, 320)],
         format='JPEG', null=True)
 
