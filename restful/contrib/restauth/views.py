@@ -37,11 +37,10 @@ class LoginView(GenericAPIView):
         self.user = self.serializer.validated_data['user']
         self.token, created = self.token_model.objects.get_or_create(user=self.user)
 
+        # jpush 注册 id
         if self.serializer.validated_data.get('jpush_registration_id'):
             self.user.jpush_registration_id = self.serializer.validated_data.get('jpush_registration_id')
             self.user.save()
-
-        # print self.serializer.validated_data
 
         if getattr(settings, 'REST_SESSION_LOGIN', True):
             login(self.request, self.user)
@@ -66,10 +65,7 @@ class LogoutView(APIView):
     """
     用户注销接口
 
-    Calls logout method and delete the Token object
-    assigned to the current User object.
-
-    Accepts/Returns nothing.
+    调用 logout 方法或者删除 Token 对象都可以注销当前用户
     """
     permission_classes = (AllowAny,)
 

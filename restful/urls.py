@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.conf.urls import include, url
 from rest_framework.routers import DefaultRouter
 
-from restful.contrib.consumer.views import ContactsViewSet
+from restful.contrib.consumer.views import HistoryViewSet, ContactViewSet
 
 router = DefaultRouter()
 
@@ -30,7 +30,9 @@ router = DefaultRouter()
 #
 # children_router = routers.NestedSimpleRouter(router, r'category', lookup='category')
 # children_router.register(r'children', ChildrenViewSet, base_name='category-children')
-# router.register(r'contacts', ContactsViewSet, 'contacts')
+router.register(r'contact', ContactViewSet, 'contact')
+router.register(r'history', HistoryViewSet, 'history')
+
 urlpatterns = (
     url(r'^v1\.0/', include(router.urls, namespace='v1.0')),
     url(r'^v1\.0/me/', include('restful.contrib.consumer.urls')),

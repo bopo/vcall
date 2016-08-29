@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.conf.urls import url, include
 from rest_framework.routers import DefaultRouter
 
-from .views import ProfileViewSet, AvatarViewSet, ContactsViewSet
+from .views import ProfileViewSet, AvatarViewSet, ContactViewSet
 
 router = DefaultRouter()
 # router.register(r'notices', NoticeViewSet, 'me-messages')
@@ -12,7 +12,7 @@ router = DefaultRouter()
 # router.register(r'extract', ExtractViewSet, 'me-extract')
 # router.register(r'shared', SharedViewSet, 'me-shared')
 # router.register(r'orders', TradeViewSet, 'me-trade')
-router.register(r'contacts', ContactsViewSet, 'me-contacts')
+# router.register(r'contacts', ContactViewSet, 'me-contacts')
 
 urlpatterns = (
     url(r'^', include(router.urls)),

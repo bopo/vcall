@@ -71,6 +71,7 @@ class CustomUser(AbstractUser):
 
     REQUIRED_FIELDS = []
     GENDER_CHOICES = (('male', '男'), ('female', '女'))
+    name = models.CharField(_(u'用户姓名'), max_length=25, db_index=True, blank=True)
     mobile = models.CharField(_(u'手机号码'), max_length=25, db_index=True, blank=True)
     verify_code = models.CharField(_(u'短信码'), max_length=5, blank=True)
     device = models.CharField(_(u'设备号'), max_length=100, blank=False, null=False)
@@ -101,9 +102,19 @@ class Message(TimeStampedModel):
 
 class Contacts(TimeStampedModel):
     '''
-    用户消息
+    联系人
     '''
     # STATIS = (('0', _('未注册')), ('1', _('注册')))
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+    content = models.TextField(_('联系人内容'), blank=True,null=True)
+    # name = models.CharField(verbose_name=_(u'联系人姓名'), max_length=255, default='')
+    # mobile = models.CharField(verbose_name=_(u'联系人手机'), max_length=255, default='')
+
+
+class History(TimeStampedModel):
+    '''
+    通话记录
+    '''
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
     name = models.CharField(verbose_name=_(u'联系人姓名'), max_length=255, default='')
     mobile = models.CharField(verbose_name=_(u'联系人手机'), max_length=255, default='')
@@ -149,19 +160,19 @@ class Profile(TimeStampedModel):
     owner = models.OneToOneField(settings.AUTH_USER_MODEL, unique=True, db_index=True, related_name='profile')
     name = models.CharField(verbose_name=_(u'姓名'), blank=True, max_length=255, db_index=True)
     nick = models.CharField(verbose_name=_(u'昵称'), blank=True, null=True, max_length=255, db_index=True)
-    phone = models.CharField(verbose_name=_(u'电话'), default='', blank=True, max_length=64)
-    gender = models.CharField(verbose_name=_(u'性别'), max_length=10, choices=GENDER_CHOICES, default=u'male')
-    zodiac = models.CharField(_(u'星座'), max_length=25, blank=True)
-    birthday = models.DateField(_(u'生日'), blank=True, null=True)
-    alipay = models.CharField(verbose_name=_(u'支付宝'), max_length=100, blank=True)
-    qq = models.CharField(verbose_name=_(u'QQ'), max_length=100, blank=True)
-    chinese_zodiac = models.CharField(_(u'生肖'), max_length=25, blank=True)
+    # phone = models.CharField(verbose_name=_(u'电话'), default='', blank=True, max_length=64)
+    # gender = models.CharField(verbose_name=_(u'性别'), max_length=10, choices=GENDER_CHOICES, default=u'male')
+    # zodiac = models.CharField(_(u'星座'), max_length=25, blank=True)
+    # birthday = models.DateField(_(u'生日'), blank=True, null=True)
+    # alipay = models.CharField(verbose_name=_(u'支付宝'), max_length=100, blank=True)
+    # qq = models.CharField(verbose_name=_(u'QQ'), max_length=100, blank=True)
+    # chinese_zodiac = models.CharField(_(u'生肖'), max_length=25, blank=True)
+    #
+    # payment = models.DecimalField(verbose_name=_(u'已经提现'), default=0.00, max_digits=10, decimal_places=2)
+    # balance = models.DecimalField(verbose_name=_(u'帐户余额'), default=0.00, max_digits=10, decimal_places=2)
+    # total = models.DecimalField(verbose_name=_(u'帐户总额'), default=0.00, max_digits=10, decimal_places=2)
 
-    payment = models.DecimalField(verbose_name=_(u'已经提现'), default=0.00, max_digits=10, decimal_places=2)
-    balance = models.DecimalField(verbose_name=_(u'帐户余额'), default=0.00, max_digits=10, decimal_places=2)
-    total = models.DecimalField(verbose_name=_(u'帐户总额'), default=0.00, max_digits=10, decimal_places=2)
-
-    qrcode = models.ImageField(verbose_name=_(u'二维码'), upload_to='qrcode')
+    # qrcode = models.ImageField(verbose_name=_(u'二维码'), upload_to='qrcode')
     avatar = ProcessedImageField(verbose_name=_(u'头像'), upload_to='avatar', processors=[ResizeToFill(320, 320)],
         format='JPEG', null=True)
 

@@ -71,17 +71,21 @@ def custom_exception_handler(exc, context):
 
             del response.data['detail']
 
-            if isinstance(detail, ReturnDict):
+            if isinstance(detail, ReturnDict) or isinstance(detail, dict):
                 data = [v[0] for k, v in detail.items()]
-                msgs = {}
+                msgs = []
 
-                print detail
                 for k, v in detail.items():
-                    msgs[k] = k + v[0]
+                    # msgs += str(k + v[0])
+                    # msgs.append('%s:%s' % (k, v))
+                    msgs.append('%s' % v)
+
+                if msgs:
+                    msgs = '|'.join(msgs)
             else:
                 msgs = detail
 
-            if data:
+            if isinstance(data, list):
                 msgs = str(data[0])
 
             response.data['errors'] = {'code': response.status_code, 'msgs': msgs}

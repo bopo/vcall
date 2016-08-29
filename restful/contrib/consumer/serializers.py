@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from rest_framework import serializers
 
-from .models import Profile, Contacts
+from .models import Profile, Contacts, History
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -44,14 +44,10 @@ class AvatarRelatedField(serializers.RelatedField):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    qrcode = serializers.URLField(read_only=True)
-    jpush_registration_id = serializers.CharField(source='owner.jpush_registration_id', read_only=True)
 
     class Meta:
         model = Profile
-        read_only_fields = ("payment", "balance", "total",)
-        fields = ("name", "nick", "phone", "avatar", "gender", "zodiac", "birthday", "alipay", "qq",
-        "payment", "balance", "total", "qrcode", "jpush_registration_id")
+        fields = ("name", "nick", "avatar")
 
 
 class PasswordSerializer(serializers.Serializer):
@@ -59,6 +55,18 @@ class PasswordSerializer(serializers.Serializer):
 
 
 class ContactsSerializer(serializers.ModelSerializer):
+
+
+    def validate(self, attrs):
+        pass
+
     class Meta:
         model = Contacts
-        fields = ("name", "mobile",)
+        # fields = ("name", "mobile",)
+
+
+
+class HistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = History
+        fields = ("name", "mobile", "modified")

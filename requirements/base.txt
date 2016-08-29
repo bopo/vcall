@@ -43,7 +43,7 @@ django-configurations
 django-cachalot
 
 django-imagekit
-django-rest-swagger==0.3.2
+django-rest-swagger==0.3.10
 
 jinja2
 jpush
@@ -61,3 +61,5 @@ wechatpy
 #click
 #plan
 django-allauth
+pybloomfiltermmap
+jsonschema

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
 import time
 
 from fabric.api import cd, env, local, run, task
+from fabric.colors import *
 from fabric.context_managers import prefix
 from fabric.contrib import django, project
 from fabric.contrib.console import prompt
@@ -30,12 +30,13 @@ env.fixtures = (
 
 env.excludes = (
     "*.pyc", "*.db", ".DS_Store", ".coverage", ".git", ".hg", ".tox", ".idea/",
-    'assets/', 'database/backups', 'database/fixtures/', 'runtime/', 'node_modules')
+    'assets/', 'database/backups', 'database/fixtures/', 'runtime/', 'node_modules', 'database/')
 
 env.remote_dir = '/root/.apps/vcall'
 env.local_dir = '.'
 env.database = 'vcall'
 env.port = '9922'
+
 
 @task
 def cert():
@@ -65,16 +66,12 @@ def test(task=''):
 
 @task
 def static():
-    with prefix('workon vcall'), cd(env.remote_dir):
+    with prefix('pyenv shell 2.7.11/envs/vcall'), cd(env.remote_dir):
         run('python manage.py collectstatic --dry-run -c --noinput')
 
 
 @task
-def rsync(static=None):
-    clean()
-
-    static and static()
-
+def rsync():
     local_dir = os.getcwd() + os.sep
     return project.rsync_project(remote_dir=env.remote_dir, local_dir=local_dir, exclude=env.excludes, delete=True)
 
@@ -86,19 +83,19 @@ def push(static=None):
 
 @task
 def migrate():
-    with prefix('workon vcall'), cd(env.remote_dir):
-        run('''DJANGO_SETTINGS_MODULE='config.settings.prod' python manage.py migrate''')
+    with prefix('pyenv shell 2.7.11/envs/vcall'), cd(env.remote_dir):
+        run('''python manage.py migrate''')
 
 
 @task(alias='rr')
 def restart():
-    with prefix('workon vcall'), cd(env.remote_dir):
-        run('/usr/bin/supervisorctl restart vcall')
+    with prefix('pyenv shell 2.7.11/envs/vcall'), cd(env.remote_dir):
+        run('/root/python/bin/supervisorctl restart vcall')
 
 
 @task
 def stop():
-    run('/usr/bin/supervisorctl stop vcall')
+    run('/root/python/bin/supervisorctl stop vcall')
 
 
 @task
@@ -115,8 +112,8 @@ def um(static=None):
 
 
 @task
-def uu(static=None):
-    rsync(static)
+def uu():
+    rsync()
     migrate()
     restart()
 
@@ -128,7 +125,7 @@ def reload():
 
 
 @task
-def prod(port=8000):
+def prod(port=8088):
     local('''MODE=prod gunicorn --worker-class=gevent config.wsgi:application -b 0.0.0.0:%s &''' % port)
 
 
@@ -209,7 +206,7 @@ def dumpdata(remote=None):
         if not remote:
             local('python manage.py dumpdata {} > database/fixtures/00{}_{}.json'.format(fixture, num, fixture))
         else:
-            with prefix('workon vcall'), cd(env.remote_dir):
+            with prefix('pyenv shell 2.7.11/envs/vcall'), cd(env.remote_dir):
                 run('python manage.py dumpdata {} > database/fixtures/00{}_{}.json'.format(fixture, num, fixture))
 
         num += 1
@@ -223,7 +220,7 @@ def loaddata(remote=None):
         if not remote:
             local('python manage.py loaddata database/fixtures/00{}_{}.json'.format(num, fixture))
         else:
-            with (prefix('workon vcall'), cd(env.remote_dir)):
+            with (prefix('pyenv shell 2.7.11/envs/vcall'), cd(env.remote_dir)):
                 run(
                     'DJANGO_SETTINGS_MODULE=config.settings.prod python manage.py loaddata database/fixtures/00{}_{}.json'.format(
                         num, fixture))
@@ -276,7 +273,7 @@ def syncdb(action='down'):
         upload=upload)
 
     # if action == 'up':
-    #     with prefix('workon vcall'), cd(env.remote_dir):
+    #     with prefix('pyenv shell 2.7.11/envs/vcall'), cd(env.remote_dir):
     #         run('python manage.py loaddata database/fixtures/*.json')
     # else:
     # restdb()
@@ -288,10 +285,10 @@ def dbmigrate():
     run('manage.py dumpdata --format=json > db.json')
 
     # rsync files.
-    local('rsync -ave ssh rsync -ave ssh root@101.200.136.70:/home/apps/vcall /home/apps')
+    # local('rsync -ave ssh rsync -ave ssh root@101.200.136.70:/home/apps/vcall /home/apps')
 
     # stop service
-    local('/usr/bin/supervisorctl stop vcall')
+    local('/root/python/bin/supervisorctl stop vcall')
 
     # migrate db
     local('dropdb {database}'.format(database=env.database))
@@ -301,12 +298,12 @@ def dbmigrate():
     local('python manage.py loaddata db.json')
 
     # start service
-    local('/usr/bin/supervisorctl start vcall')
+    local('/root/python/bin/supervisorctl start vcall')
 
 
 @task
 def req():
-    with prefix('workon vcall'), cd(env.remote_dir):
+    with prefix('pyenv shell 2.7.11/envs/vcall'), cd(env.remote_dir):
         run('pip install -r requirements/prod.txt')
 
 
@@ -319,3 +316,8 @@ def check():
 def init():
     setup()
     loaddata()
+
+
+@task()
+def hello():
+    print green('hell0'), red('hello'), blue('hello'), yellow('hello')

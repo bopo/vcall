@@ -19,8 +19,8 @@ class VerifyMobileSerializer(serializers.Serializer):
 class RegisterSerializer(serializers.Serializer):
     mobile = serializers.CharField(label=_(u'手机号'), required=True, allow_blank=True)
 
-    password1 = serializers.CharField(label=_(u'登录密码'), style={'input_type': 'password'})
-    password2 = serializers.CharField(label=_(u'确认密码'), style={'input_type': 'password'})
+    # password1 = serializers.CharField(label=_(u'登录密码'), style={'input_type': 'password'})
+    # password2 = serializers.CharField(label=_(u'确认密码'), style={'input_type': 'password'})
 
     verify = serializers.CharField(label=_(u'验证码'), required=True, allow_blank=True)
     device = serializers.CharField(label=_(u'设备号'), required=True, allow_blank=True, help_text=_('隐藏字段,设备自动获取'))

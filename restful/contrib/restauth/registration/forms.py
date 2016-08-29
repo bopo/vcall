@@ -38,10 +38,10 @@ class SignupForm(forms.Form):
     verify = forms.CharField(label=_(u"验证码"), max_length=10, required=False)
     device = forms.CharField(label=_(u"设备号"), max_length=200, required=True)
 
-    password1 = SetPasswordField(label=_(u"登陆密码"), required=True)
-    password2 = PasswordField(label=_(u"确认密码"), required=True)
+    # password1 = SetPasswordField(label=_(u"登陆密码"), required=True)
+    # password2 = PasswordField(label=_(u"确认密码"), required=False)
 
-    jpush_registration_id = forms.CharField(label=_(u"jpush_registration_id"), max_length=200, required=False)
+    # jpush_registration_id = forms.CharField(label=_(u"jpush_registration_id"), max_length=200, required=False)
 
     def __init__(self, *args, **kwargs):
         super(SignupForm, self).__init__(*args, **kwargs)
@@ -55,16 +55,16 @@ class SignupForm(forms.Form):
         if not self.cleaned_data.get("mobile", None):
             raise ValidationError({'mobile': _("手机号码不能为空.")})
 
-        if app_settings.SIGNUP_PASSWORD_VERIFICATION and "password1" in self.cleaned_data and "password2" in self.cleaned_data:
-            if self.cleaned_data["password1"] != self.cleaned_data["password2"]:
-                raise ValidationError({'password': _("两次密码不一致.")})
+        # if app_settings.SIGNUP_PASSWORD_VERIFICATION and "password1" in self.cleaned_data and "password2" in self.cleaned_data:
+        #     if self.cleaned_data["password1"] != self.cleaned_data["password2"]:
+        #         raise ValidationError({'password': _("两次密码不一致.")})
 
-        # if not self.cleaned_data.get("verify", None):
-        #     raise ValidationError({'verify': _("验证码不能为空.")})
+        if not self.cleaned_data.get("verify", None):
+            raise ValidationError({'verify': _("验证码不能为空.")})
 
         # 判断验证码
         verify_status, verify_message = check_verify_code(self.cleaned_data["mobile"], self.cleaned_data["verify"])
-        #
+
         if not verify_status:
             raise ValidationError({'verify': verify_message})
 
@@ -72,8 +72,8 @@ class SignupForm(forms.Form):
             raise ValidationError({'device': _("设备号码不能为空.")})
 
         # 判断手机是否注册过
-        if get_user_model()._default_manager.filter(mobile=self.cleaned_data['mobile']).exists():
-            raise ValidationError(_("用户手机号码已经注册过."))
+        # if get_user_model()._default_manager.filter(mobile=self.cleaned_data['mobile']).exists():
+        #     raise ValidationError(_("用户手机号码已经注册过."))
 
         return self.cleaned_data
 
@@ -98,7 +98,8 @@ class SignupForm(forms.Form):
         mobile = data.get('mobile')
         verify = data.get('verify')
         device = data.get('device')
-        jpush_registration_id = data.get('jpush_registration_id')
+
+        # jpush_registration_id = data.get('jpush_registration_id')
 
         if verify:
             user_field(user, 'verify', verify)
@@ -109,8 +110,8 @@ class SignupForm(forms.Form):
         if mobile:
             user_field(user, 'mobile', mobile)
 
-        if jpush_registration_id:
-            user_field(user, 'jpush_registration_id', jpush_registration_id)
+        # if jpush_registration_id:
+        #     user_field(user, 'jpush_registration_id', jpush_registration_id)
 
         if 'password1' in data:
             user.set_password(data["password1"])
