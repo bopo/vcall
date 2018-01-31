@@ -1,5 +1,4 @@
 django-rest-swagger
-pydoc
 sphinx
 pydoctor
 sphinx_rtd_theme

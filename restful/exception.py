@@ -85,8 +85,8 @@ def custom_exception_handler(exc, context):
             else:
                 msgs = detail
 
-            if isinstance(data, list):
-                msgs = str(data[0])
+            if isinstance(msgs, list):
+                msgs = str(msgs[0])
 
             response.data['errors'] = {'code': response.status_code, 'msgs': msgs}
     else:

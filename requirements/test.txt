@@ -3,8 +3,7 @@
 django-nose
 coverage
 doctest2
-pytest
-trial
+#trial
 mock
 nose
 tox

@@ -92,13 +92,17 @@ def import_attribute(path):
 
 
 def check_verify_code(mobile, verify):
-    obj = Verification.objects.filter(mobile=mobile)
-    ret = bool(obj.get().verify == str(verify))
+    obj = Verification.objects.get(mobile=mobile)
+
+    if obj:
+        ret = bool(obj.verify == str(verify))
+    else:
+        return '该验证码不存在'
 
     if ret:
-        return True, '验证成功'
+        return True, u'验证成功'
 
-    return False, '验证码错误,请重新输入'
+    return False, u'验证码错误,请重新输入'
 
 
 def send_verify_code(mobile):
@@ -106,4 +110,4 @@ def send_verify_code(mobile):
     verify.verify = verify.generate_key()
     verify.save()
 
-    return [verify.verify, '发送成功']
+    return [verify.verify, u'发送成功']

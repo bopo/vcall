@@ -78,9 +78,15 @@ class SignupForm(forms.Form):
         return self.cleaned_data
 
     def save(self, request):
+        user = get_user_model().objects.get(mobile=self.cleaned_data.get("mobile"))
+
+        if user:
+            return user
+
         user = get_user_model()()
         nums = get_user_model().objects.filter(device=self.cleaned_data.get("device")).count()
-        print nums, user, self.cleaned_data.get("device")
+
+        # print nums, user, self.cleaned_data.get("device")
 
         if nums >= settings.DEVICE_MAX_REG_NUMS:
             raise ValidationError(_("该设备超出最大注册数."))

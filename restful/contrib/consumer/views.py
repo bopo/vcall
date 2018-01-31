@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import json
-import re
 
 from jsonschema import validate
 from rest_framework import mixins
@@ -101,7 +100,9 @@ class ContactViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.Ge
         for item in content:
             for mobile in item.get('number'):
                 print mobile
-                if mobile and re.match(r'^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$', mobile):
+                # if mobile and re.match(r'^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$', mobile):
+
+                if mobile:
                     contact, status_ = Contacts.objects.get_or_create(mobile=mobile)
 
                     if status_:

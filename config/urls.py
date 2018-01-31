@@ -6,7 +6,6 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = (
-
     url(r'^api/', include('restful.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
